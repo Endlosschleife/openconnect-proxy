@@ -6,6 +6,7 @@ RUN apk add --no-cache oath-toolkit-libpskc --repository http://dl-cdn.alpinelin
 RUN apk add --no-cache nettle --repository http://dl-cdn.alpinelinux.org/alpine/edge/main
 # openconnect is not yet available on main
 RUN apk add --no-cache openconnect tinyproxy --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing
+RUN apk add cmd:pip3
 
 RUN apk add --no-cache ca-certificates wget \
     && wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \
@@ -21,8 +22,10 @@ RUN apk add --no-cache ca-certificates wget \
     && apk add --no-cache python3 bind-tools && pip3 install --upgrade pip \
     && pip3 install https://github.com/dlenski/vpn-slice/archive/master.zip \
     # always add the docker DNS server
-    && grep -qxF 'nameserver 127.0.0.11' /etc/resolv.conf || echo 'nameserver 127.0.0.11' >> /etc/resolv.conf \
+    && grep -qxF 'nameserver 127.0.0.11' /etc/resolv.conf.override || echo 'nameserver 127.0.0.11' >> /etc/resolv.conf.override \
     && apk del .build-deps wget
+
+CMD cp /etc/resolv.conf.override /etc/resolv.conf
 
 # Use an up-to-date version of vpnc-script
 # https://www.infradead.org/openconnect/vpnc-script.html
